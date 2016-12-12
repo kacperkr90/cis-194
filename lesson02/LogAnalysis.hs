@@ -50,10 +50,10 @@ insert m (Node _ (Unknown _) _) = createEmptyNode m
 insert m@(LogMessage _ ct _) (Node l m2@(LogMessage _ pt _) r) 
   | ct < pt = case l of
     Leaf -> Node (createEmptyNode m) m2 r
-    lmt  -> Node (insert m lmt) m2 r
-  | otherwise = case l of
+    _    -> Node (insert m l) m2 r
+  | otherwise = case r of
     Leaf -> Node l m2 (createEmptyNode m)
-    rmt  -> Node l m2 (insert m rmt)
+    _    -> Node l m2 (insert m r)
 
 
 createEmptyNode :: LogMessage -> MessageTree
@@ -69,5 +69,8 @@ buildTree (x:xs) t = buildTree xs (insert x t)
 
 inOrder :: MessageTree -> [LogMessage]
 inOrder (Node Leaf lm Leaf) = [lm]
-inOrder (Node lt lm gt) = inOrder lt ++ [lm] ++ inOrder gt
+inOrder (Node l lm r) = inOrder l ++ [lm] ++ inOrder r
 inOrder Leaf = []
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong logs = 
