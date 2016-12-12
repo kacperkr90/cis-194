@@ -63,14 +63,45 @@ build :: [LogMessage] -> MessageTree
 build messages = buildTree messages Leaf 
 
 buildTree :: [LogMessage] -> MessageTree -> MessageTree
-buildTree [] t = t
-buildTree [x] t = insert x t
+buildTree [] t     = t
+buildTree [x] t    = insert x t
 buildTree (x:xs) t = buildTree xs (insert x t)
 
 inOrder :: MessageTree -> [LogMessage]
 inOrder (Node Leaf lm Leaf) = [lm]
-inOrder (Node l lm r) = inOrder l ++ [lm] ++ inOrder r
-inOrder Leaf = []
+inOrder (Node l lm r)       = inOrder l ++ [lm] ++ inOrder r
+inOrder Leaf                = []
 
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong logs = 
+whatWentWrong = mapErrorMessagesToString . filterToSevereErrors . takeOnlyErrors . inOrder . build
+
+takeOnlyErrors :: [LogMessage] -> [LogMessage]
+takeOnlyErrors (lm@(LogMessage (Error _) _ _) : xs) = lm : takeOnlyErrors xs
+takeOnlyErrors (_:xs) = takeOnlyErrors xs
+takeOnlyErrors []     = []
+
+filterToSevereErrors :: [LogMessage] -> [LogMessage]
+filterToSevereErrors (lm@(LogMessage (Error serevity) _ _) : xs)
+  | serevity > 50 = lm : filterToSevereErrors xs
+  | otherwise     = filterToSevereErrors xs
+filterToSevereErrors (_:xs) = filterToSevereErrors xs
+filterToSevereErrors [] = []
+
+mapErrorMessagesToString :: [LogMessage] -> [String]
+mapErrorMessagesToString (x:xs) = mapErrorMessageToString x : mapErrorMessagesToString xs
+mapErrorMessagesToString []     = []
+
+mapErrorMessageToString :: LogMessage -> String
+mapErrorMessageToString (LogMessage _ _ info) = info
+mapErrorMessageToString _                     = ""
+
+mapErrorMessageToString' :: LogMessage -> String
+mapErrorMessageToString' (LogMessage errorType timeStamp info) = unwords [mapErrorTypeToString errorType, mapTimeStampToString timeStamp, info]
+mapErrorMessageToString' _                                     = ""
+
+mapErrorTypeToString :: MessageType -> String
+mapErrorTypeToString (Error serevity) = unwords ["E", show serevity]
+mapErrorTypeToString _                = ""
+
+mapTimeStampToString :: TimeStamp -> String
+mapTimeStampToString = show
