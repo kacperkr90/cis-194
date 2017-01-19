@@ -5,6 +5,8 @@ module Golf where
 import Data.Maybe
 import Data.List
 
+-- EXCERCISE 1
+
 skips :: [a] -> [[a]]
 skips []   = [[]]
 skips list = map mapMaybeListToList $ skipsSafe list
@@ -38,8 +40,39 @@ skipsSafe list = map (takeEveryNth list) [1..(length list)]
 mapMaybeListToList :: [Maybe a] -> [a]
 mapMaybeListToList list = map fromJust $ filter isJust list
 
-localMaximum :: [Integer] -> [Integer]
-localMaximum list = list
-
 test :: Char -> Bool
-test = isDividedBy 2 . fromJust . flip elemIndex "Hello!" 
+test = isDividedBy 2 . fromJust . flip elemIndex "Hello!"
+
+-- EXCERCISE 2
+
+localMaxima :: [Integer] -> [Integer]
+localMaxima = map toLocalMaxima . filter hasLocalMaxima . listOfLists
+
+listOfLists :: [Integer] -> [(Integer, Integer, Integer)]
+listOfLists (x:xs@(y:z:_)) = (x,y,z) : listOfLists xs
+listOfLists _ = []
+
+hasLocalMaxima :: (Integer, Integer, Integer) -> Bool
+hasLocalMaxima (x, y, z) = max x y == y && max y z == y
+
+toLocalMaxima :: (Integer, Integer, Integer) -> Integer
+toLocalMaxima (_, y, _) = y
+
+-- EXCERCISE 3
+type Count = Int
+type Value = Integer
+type ValueToFind = Integer
+
+histogram :: [Integer] -> String
+histogram x = "test"
+
+countValueRepetitions :: [Value] -> Value -> Count
+countValueRepetitions [] _ = 0
+countValueRepetitions list a = length $ filter (==a) list 
+
+isValueRepeatedNthTimes :: [Value] -> Value -> Count -> Bool
+isValueRepeatedNthTimes list a n = n == countValueRepetitions list a
+
+drawHistogramCell :: Bool -> Char
+drawHistogramCell True = '*'
+drawHistogramCell False = ' '
