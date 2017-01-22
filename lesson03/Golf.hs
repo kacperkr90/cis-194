@@ -60,19 +60,32 @@ toLocalMaxima (_, y, _) = y
 
 -- EXCERCISE 3
 type Count = Int
-type Value = Integer
 type ValueToFind = Integer
 
 histogram :: [Integer] -> String
-histogram x = "test"
+histogram x = unlines $ reverse $ drawHistogramLegend : drawHistogramAxis : map (drawHistogramLevel x) [1 .. (findMaxNumberOfRepetitions x)]
 
-countValueRepetitions :: [Value] -> Value -> Count
+countValueRepetitions :: [Integer] -> ValueToFind -> Count
 countValueRepetitions [] _ = 0
 countValueRepetitions list a = length $ filter (==a) list 
 
-isValueRepeatedNthTimes :: [Value] -> Value -> Count -> Bool
-isValueRepeatedNthTimes list a n = n == countValueRepetitions list a
+isValueRepeatedAtLeastNthTimes :: [Integer] -> Count -> ValueToFind -> Bool
+isValueRepeatedAtLeastNthTimes list n a = n <= countValueRepetitions list a
 
-drawHistogramCell :: Bool -> Char
-drawHistogramCell True = '*'
-drawHistogramCell False = ' '
+drawHistogramCell :: [Integer] -> Count -> ValueToFind -> Char
+drawHistogramCell [] _ _ = ' '
+drawHistogramCell list n a = case isValueRepeatedAtLeastNthTimes list n a of
+  True -> '*'
+  False -> ' '
+
+drawHistogramLevel :: [Integer] -> Count -> String
+drawHistogramLevel list n = map (drawHistogramCell list n) [0..9]
+
+findMaxNumberOfRepetitions :: [Integer] -> Int
+findMaxNumberOfRepetitions list = maximum $ map length (group $ sort list)
+
+drawHistogramAxis :: String
+drawHistogramAxis = replicate 10 '='
+
+drawHistogramLegend :: String
+drawHistogramLegend = "0123456789"
