@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 fun1 :: [Integer] -> Integer
-fun1 []     = 1
+fun1 [] = 1
 fun1 (x:xs)
   | even x    = (x - 2) * fun1 xs
   | otherwise = fun1 xs
@@ -33,3 +33,10 @@ if' False _ b = b
 -- "Beautiful" point-free style domain function :D
 domainFun2' :: Integer -> Integer
 domainFun2' n = if' (even n) (n `div` 2) (3 * n + 1)
+
+data Tree a = Leaf
+            | Node Integer (Tree a) a (Tree a)
+  deriving (Show, Eq)
+
+foldTree :: [a] -> Tree a
+foldTree   = Leaf
