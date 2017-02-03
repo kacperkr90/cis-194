@@ -64,3 +64,14 @@ createLeaf x = Node 0 Leaf x Leaf
 treeHeight :: Tree a -> Integer
 treeHeight Leaf = 0
 treeHeight (Node h _ _ _) = h
+
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (flip f) base (reverse xs)
+
+-- Excercise 4
+
+--sieveSundaram :: Integer -> [Integer]
+--sieveSundaram = 
+
+cartProd :: [a] -> [b] -> [(a, b)]
+cartProd xs ys = [(x,y) | x <- xs, y <- ys]	
