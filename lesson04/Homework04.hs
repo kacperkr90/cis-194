@@ -46,17 +46,17 @@ insert x Leaf = createLeaf x
 insert x (Node h Leaf v r) = Node (h + 1) (createLeaf x) v r
 insert x (Node h l v Leaf) = Node h l v (createLeaf x)
 insert x (Node h l v r)
- 	| hl < hr = Node h nl v r
- 	| hl > hr = Node h l v nr
- 	| hnl <= hr = Node h nl v r
- 	| otherwise = Node (hnr + 1) l v nr
+  | hl < hr = Node h nl v r
+  | hl > hr = Node h l v nr
+  | hnl <= hr = Node h nl v r
+  | otherwise = Node (hnr + 1) l v nr
   where
-  	hl = treeHeight l
-  	hr = treeHeight r 
-  	nl = (insert x l)
-  	nr = (insert x r)
-  	hnl = treeHeight nl
-  	hnr = treeHeight nr
+    hl = treeHeight l
+    hr = treeHeight r 
+    nl = insert x l
+    nr = insert x r
+    hnl = treeHeight nl
+    hnr = treeHeight nr
 
 createLeaf :: a -> Tree a
 createLeaf x = Node 0 Leaf x Leaf
@@ -70,8 +70,9 @@ myFoldl f base xs = foldr (flip f) base (reverse xs)
 
 -- Excercise 4
 
---sieveSundaram :: Integer -> [Integer]
---sieveSundaram = 
+sieveSundaram :: Integer -> [Integer]
+--sieveSundaram = map (\(x, y) -> x + y + 2 * x * y) . (\x -> cartProd x x) . (\x -> [1 .. (2 * x + 2)])
+sieveSundaram = filter  
 
 cartProd :: [a] -> [b] -> [(a, b)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]	
