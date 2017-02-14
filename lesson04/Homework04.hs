@@ -36,6 +36,8 @@ if' False _ b = b
 domainFun2' :: Integer -> Integer
 domainFun2' n = if' (even n) (n `div` 2) (3 * n + 1)
 
+-- Excercise 2
+
 data Tree a = Leaf
             | Node Integer (Tree a) a (Tree a)
   deriving (Show, Eq)
@@ -67,10 +69,20 @@ treeHeight :: Tree a -> Integer
 treeHeight Leaf = 0
 treeHeight (Node h _ _ _) = h
 
+-- Excercise 3
+
+xor :: [Bool] -> Bool
+xor = odd . foldr incrementWhenTrue 0
+
+incrementWhenTrue :: Bool -> Integer -> Integer
+incrementWhenTrue True x = x + 1
+incrementWhenTrue False x = x
+
+map' :: (a -> b) -> [a] -> [b]
+map' f = foldr (\x -> (:) (f x)) []
+
 myFoldl :: (a -> b -> a) -> a -> [b] -> a
 myFoldl f base xs = foldr (flip f) base (reverse xs)
-
-
 
 -- Excercise 4
 sieveSundaram :: Integer -> [Integer]
