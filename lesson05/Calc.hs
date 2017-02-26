@@ -1,9 +1,13 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# OPTIONS_GHC -XDataKinds #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Calc where
 import ExprT
 import Parser
+import StackVM
+import Data.Maybe
 
 -- Excercise 1
 
@@ -12,13 +16,13 @@ class Evaluable a where
 
 instance Evaluable ExprT where
   eval (Lit a)   = a
-  eval (Add a b) = eval a + eval b
-  eval (Mul a b) = eval a * eval b
+  eval (ExprT.Add a b) = eval a + eval b
+  eval (ExprT.Mul a b) = eval a * eval b
 
 -- Excercise 2
 
 evalStr :: String -> Maybe Integer
-evalStr = evalMaybe . parseExp Lit Add Mul
+evalStr = evalMaybe . parseExp Lit ExprT.Add ExprT.Mul
 
 evalMaybe :: Evaluable a => Maybe a -> Maybe Integer
 evalMaybe Nothing = Nothing
@@ -33,8 +37,8 @@ class Expr a where
 
 instance Expr ExprT where
   lit a   = Lit a
-  add a b = Add a b
-  mul a b = Mul a b
+  add a b = ExprT.Add a b
+  mul a b = ExprT.Mul a b
 
 reify :: ExprT -> ExprT
 reify = id
@@ -72,5 +76,23 @@ testInteger = testExp :: Maybe Integer
 testBool    = testExp :: Maybe Bool
 testMM      = testExp :: Maybe MinMax
 testSat     = testExp :: Maybe Mod7
+testProgram = testExp :: Maybe Program
 
 -- Excercise 5
+
+instance Expr Program where
+  lit a = [PushI a]
+  add [PushI a] [PushI b] = [PushI a, PushI b, StackVM.Add]
+  add [PushB a] [PushB b] = [PushB a, PushB b, Or]
+  add p1@(PushB _ : _) p2@(PushB _ : _) = p1 ++ p2 ++ [Or]
+  add p1 p2 = p1 ++ p2 ++ [StackVM.Add]
+  mul [PushI a] [PushI b] = [PushI a, PushI b, StackVM.Mul]
+  mul [PushB a] [PushB b] = [PushB a, PushB b, And]
+  mul p1@(PushB _ : _) p2@(PushB _ : _) = p1 ++ p2 ++ [And]
+  mul p1 p2 = p1 ++ p2 ++ [StackVM.Mul]
+
+compile :: String -> Maybe Program
+compile = parseExp lit add mul
+
+compileAndRun :: String -> Either String StackVal
+compileAndRun = stackVM . fromJust .  compile
