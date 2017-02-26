@@ -81,15 +81,15 @@ testProgram = testExp :: Maybe Program
 -- Excercise 5
 
 instance Expr Program where
-  lit a = [PushI a]
-  add [PushI a] [PushI b] = [PushI a, PushI b, StackVM.Add]
-  add [PushB a] [PushB b] = [PushB a, PushB b, Or]
+  lit a                                 = [PushI a]
+  add [PushI a] [PushI b]               = [PushI a, PushI b, StackVM.Add]
+  add [PushB a] [PushB b]               = [PushB a, PushB b, Or]
   add p1@(PushB _ : _) p2@(PushB _ : _) = p1 ++ p2 ++ [Or]
-  add p1 p2 = p1 ++ p2 ++ [StackVM.Add]
-  mul [PushI a] [PushI b] = [PushI a, PushI b, StackVM.Mul]
-  mul [PushB a] [PushB b] = [PushB a, PushB b, And]
+  add p1 p2                             = p1 ++ p2 ++ [StackVM.Add]
+  mul [PushI a] [PushI b]               = [PushI a, PushI b, StackVM.Mul]
+  mul [PushB a] [PushB b]               = [PushB a, PushB b, And]
   mul p1@(PushB _ : _) p2@(PushB _ : _) = p1 ++ p2 ++ [And]
-  mul p1 p2 = p1 ++ p2 ++ [StackVM.Mul]
+  mul p1 p2                             = p1 ++ p2 ++ [StackVM.Mul]
 
 compile :: String -> Maybe Program
 compile = parseExp lit add mul
