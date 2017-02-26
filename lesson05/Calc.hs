@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# OPTIONS_GHC -XDataKinds #-}
 
+module Calc where
 import ExprT
 import Parser
 
@@ -14,7 +15,7 @@ instance Evaluable ExprT where
   eval (Add a b) = eval a + eval b
   eval (Mul a b) = eval a * eval b
 
--- Excercise 2  
+-- Excercise 2
 
 evalStr :: String -> Maybe Integer
 evalStr = evalMaybe . parseExp Lit Add Mul
@@ -31,7 +32,7 @@ class Expr a where
   mul :: a -> a -> a
 
 instance Expr ExprT where
-  lit a = Lit a
+  lit a   = Lit a
   add a b = Add a b
   mul a b = Mul a b
 
@@ -41,7 +42,7 @@ reify = id
 -- Excercise 4
 
 instance Expr Integer where
-  lit a = a
+  lit a   = a
   add a b = a + b
   mul a b = a * b
 
@@ -49,7 +50,7 @@ instance Expr Bool where
   lit a
     | a > 0 = False
   	| otherwise = True
-  add a b = a || b 
+  add a b = a || b
   mul a b = a && b
 
 newtype MinMax = MinMax Integer deriving (Eq, Show, Ord)
@@ -61,16 +62,15 @@ instance Expr MinMax where
   mul a b = min a b
 
 instance Expr Mod7 where
-  lit a = Mod7 a
+  lit a                 = Mod7 a
   add (Mod7 a) (Mod7 b) = Mod7 ((a + b) `mod` 7)
   mul (Mod7 a) (Mod7 b) = Mod7 ((a * b) `mod` 7)
 
 testExp :: Expr a => Maybe a
-testExp = parseExp lit add mul "(3 * -4) + 5"
-testInteger  = testExp :: Maybe Integer
-testBool     = testExp :: Maybe Bool
-testMM       = testExp :: Maybe MinMax
-testSat      = testExp :: Maybe Mod7
+testExp     = parseExp lit add mul "(3 * -4) + 5"
+testInteger = testExp :: Maybe Integer
+testBool    = testExp :: Maybe Bool
+testMM      = testExp :: Maybe MinMax
+testSat     = testExp :: Maybe Mod7
 
 -- Excercise 5
-
