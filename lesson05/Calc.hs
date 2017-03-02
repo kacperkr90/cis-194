@@ -7,7 +7,9 @@ module Calc where
 import ExprT
 import Parser
 import StackVM
+import VarExprT
 import Data.Maybe
+import qualified Data.Map as M
 
 -- Excercise 1
 
@@ -15,14 +17,14 @@ class Evaluable a where
   eval :: a -> Integer
 
 instance Evaluable ExprT where
-  eval (Lit a)   = a
+  eval (ExprT.Lit a)   = a
   eval (ExprT.Add a b) = eval a + eval b
   eval (ExprT.Mul a b) = eval a * eval b
 
 -- Excercise 2
 
 evalStr :: String -> Maybe Integer
-evalStr = evalMaybe . parseExp Lit ExprT.Add ExprT.Mul
+evalStr = evalMaybe . parseExp ExprT.Lit ExprT.Add ExprT.Mul
 
 evalMaybe :: Evaluable a => Maybe a -> Maybe Integer
 evalMaybe Nothing = Nothing
@@ -36,7 +38,7 @@ class Expr a where
   mul :: a -> a -> a
 
 instance Expr ExprT where
-  lit a   = Lit a
+  lit a   = ExprT.Lit a
   add a b = ExprT.Add a b
   mul a b = ExprT.Mul a b
 
@@ -61,12 +63,12 @@ newtype MinMax = MinMax Integer deriving (Eq, Show, Ord)
 newtype Mod7 = Mod7 Integer deriving (Eq, Show)
 
 instance Expr MinMax where
-  lit a   = MinMax a
+  lit     = MinMax
   add a b = max a b
   mul a b = min a b
 
 instance Expr Mod7 where
-  lit a                 = Mod7 a
+  lit                   = Mod7
   add (Mod7 a) (Mod7 b) = Mod7 ((a + b) `mod` 7)
   mul (Mod7 a) (Mod7 b) = Mod7 ((a * b) `mod` 7)
 
@@ -96,3 +98,16 @@ compile = parseExp lit add mul
 
 compileAndRun :: String -> Either String StackVal
 compileAndRun = stackVM . fromJust .  compile
+
+-- Excercise 6
+
+class HasVars a where
+  var :: String -> a
+
+instance Expr VarExprT where
+  lit = VarExprT.Lit
+  add a b = VarExprT.Add a b
+  mul a b = VarExprT.Mul a b
+
+instance HasVars VarExprT where
+  var = Var
