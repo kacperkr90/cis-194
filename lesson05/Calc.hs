@@ -111,3 +111,14 @@ instance Expr VarExprT where
 
 instance HasVars VarExprT where
   var = Var
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+  	var x = M.lookup x
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+  lit =   	
+
+withVars :: [(String, Integer)]
+         -> (M.Map String Integer -> Maybe Integer)
+         -> Maybe Integer
+withVars vs exp = exp $ M.fromList vs  	
