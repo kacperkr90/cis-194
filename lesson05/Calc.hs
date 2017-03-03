@@ -55,7 +55,7 @@ instance Expr Integer where
 instance Expr Bool where
   lit a
     | a > 0 = False
-  	| otherwise = True
+    | otherwise = True
   add a b = a || b
   mul a b = a && b
 
@@ -74,10 +74,20 @@ instance Expr Mod7 where
 
 testExp :: Expr a => Maybe a
 testExp     = parseExp lit add mul "(3 * -4) + 5"
+
+testInteger :: Maybe Integer
 testInteger = testExp :: Maybe Integer
+
+testBool :: Maybe Bool
 testBool    = testExp :: Maybe Bool
+
+testMM :: Maybe MinMax
 testMM      = testExp :: Maybe MinMax
+
+testSat :: Maybe Mod7
 testSat     = testExp :: Maybe Mod7
+
+testProgram :: Maybe Program
 testProgram = testExp :: Maybe Program
 
 -- Excercise 5
@@ -112,13 +122,29 @@ instance Expr VarExprT where
 instance HasVars VarExprT where
   var = Var
 
+type IntegerFromMap = (M.Map String Integer -> Maybe Integer)
+
 instance HasVars (M.Map String Integer -> Maybe Integer) where
-  	var x = M.lookup x
+  var x = M.lookup x
 
 instance Expr (M.Map String Integer -> Maybe Integer) where
-  lit =   	
+  lit = const . Just
+  add = performArtmeticOperation (+)
+  mul = performArtmeticOperation (*)
+
+performArtmeticOperation :: (Integer -> Integer -> Integer)
+                         -> IntegerFromMap
+                         -> IntegerFromMap
+                         -> M.Map String Integer
+                         -> Maybe Integer
+performArtmeticOperation func exp1 exp2 m
+  | isJust res1 && isJust res2 = Just $ func (fromJust res1) (fromJust res2)
+  | otherwise = Nothing
+  where
+    res1 = exp1 m
+    res2 = exp2 m
 
 withVars :: [(String, Integer)]
          -> (M.Map String Integer -> Maybe Integer)
          -> Maybe Integer
-withVars vs exp = exp $ M.fromList vs  	
+withVars vs func = func $ M.fromList vs
