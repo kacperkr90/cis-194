@@ -1,4 +1,5 @@
 -- Excercise 1
+
 import Data.List
 
 fib:: Integer -> Integer
@@ -21,7 +22,34 @@ fibs2l= reverse $ foldl' fibl [] [0 .. ]
 fibl :: [Integer] -> Integer -> [Integer]
 fibl [] x             = [x]
 fibl [x] y            = [x, y]
-fibl (x0 : x1 : xs) y =  next : rest
+fibl (x0 : x1 : xs) _ =  next : rest
   where
     next = x0 + x1
     rest = (x0 : x1 : xs)
+
+fibs2' :: [[Integer]]
+fibs2' =  iterate fib2 [1, 0]
+
+fib2:: [Integer] -> [Integer]
+fib2 []             = []
+fib2 [x]            = [x]
+fib2 (x0 : x1 : xs) =  next : rest
+  where
+    next = x0 + x1
+    rest = (x0 : x1 : xs)
+
+-- after checking some hints :(
+
+-- iterate
+fibsIter:: [Integer]
+fibsIter= map fst $ iterate fib' (0, 1)
+  where
+    fib' (a, b) = (b, a + b)
+
+-- zipWith
+fibsZipWith :: [Integer]
+fibsZipWith= 0 : 1 : zipWith (+) fibsZipWith (tail fibsZipWith)
+
+-- scanl
+fibsScanl :: [Integer]
+fibsScanl = map head $ scanl fibl [0, 1] [2 ..]
