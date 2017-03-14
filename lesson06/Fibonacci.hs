@@ -75,3 +75,9 @@ streamFromSeed expr a = Cons a (streamFromSeed expr (expr a))
 
 nats :: Stream Integer
 nats = streamFromSeed succ 0
+
+interleaveStreams :: Stream a -> Stream a -> Stream a
+interleaveStreams (Cons a s1) s2 = Cons a (interleaveStreams s2 s1)
+
+-- ruler :: Stream Integer
+
