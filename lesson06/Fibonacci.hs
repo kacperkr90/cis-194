@@ -11,10 +11,6 @@ fibs1:: [Integer]
 fibs1= map fib [0 .. ]
 
 -- Excercise 2
-
-data Stream = Cons Integer Stream
-  deriving Show
-
 -- first try, unfortunately a bad one. List causes infinite evaluation even with take 1 fibs2l
 fibs2l:: [Integer]
 fibs2l= reverse $ foldl' fibl [] [0 .. ]
@@ -53,3 +49,29 @@ fibsZipWith= 0 : 1 : zipWith (+) fibsZipWith (tail fibsZipWith)
 -- scanl
 fibsScanl :: [Integer]
 fibsScanl = map head $ scanl fibl [0, 1] [2 ..]
+
+-- Excercise 3
+
+data Stream a = Cons a (Stream a)
+
+streamToList :: Stream a -> [a]
+streamToList (Cons a stream) = a : streamToList stream
+
+instance Show a => Show (Stream a) where
+  show = unwords . take 20 . map show . streamToList
+
+-- Excercise 4
+
+streamRepeat :: a -> Stream a
+streamRepeat x = Cons x (streamRepeat x)
+
+streamMap :: (a -> b) -> Stream a -> Stream b
+streamMap expr (Cons a stream) = Cons (expr a) (streamMap expr stream)
+
+streamFromSeed :: (a -> a) -> a -> Stream a
+streamFromSeed expr a = Cons a (streamFromSeed expr (expr a))
+
+-- Excercise 5
+
+nats :: Stream Integer
+nats = streamFromSeed succ 0
