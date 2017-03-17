@@ -1,6 +1,12 @@
+{-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE FlexibleContexts #-}
+
 -- Excercise 1
 
 import Data.List
+import Numeric (showIntAtBase)
+import Data.Char (intToDigit)
+import Data.Maybe (fromJust, isJust)
 
 fib:: Integer -> Integer
 fib 0 = 0
@@ -58,7 +64,7 @@ streamToList :: Stream a -> [a]
 streamToList (Cons a stream) = a : streamToList stream
 
 instance Show a => Show (Stream a) where
-  show = unwords . take 20 . map show . streamToList
+  show = unwords . take 22 . map show . streamToList
 
 -- Excercise 4
 
@@ -79,5 +85,20 @@ nats = streamFromSeed succ 0
 interleaveStreams :: Stream a -> Stream a -> Stream a
 interleaveStreams (Cons a s1) s2 = Cons a (interleaveStreams s2 s1)
 
--- ruler :: Stream Integer
+ruler :: Stream Integer
+ruler = interleaveStreams zeros a001511Seq
+  where
+    zeros = streamRepeat 0
+    oneToInfinity= streamFromSeed succ 1
+    a001511Seq = streamMap (succ . valueOrMinusOne . indexOfOneFromLeft . toBinaryRepresentation) oneToInfinity
 
+toBinaryRepresentation :: Integer -> String
+toBinaryRepresentation x = showIntAtBase 2 intToDigit x ""
+
+indexOfOneFromLeft :: String -> Maybe Int
+indexOfOneFromLeft x = elemIndex '1' (reverse x)
+
+valueOrMinusOne :: Maybe Int -> Integer
+valueOrMinusOne x
+  | isJust x = toInteger $ fromJust x
+  | otherwise = -1
