@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 -- Excercise 1
 
@@ -102,3 +103,13 @@ valueOrMinusOne :: Maybe Int -> Integer
 valueOrMinusOne x
   | isJust x = toInteger $ fromJust x
   | otherwise = -1
+
+z :: Stream Integer
+z = Cons 0 (Cons 1 (streamRepeat 0))
+
+instance Num (Stream Integer) where
+  fromInteger n = Cons n (streamRepeat 0)
+  negate s = streamMap negate s
+  (Cons a sa) + (Cons b sb) = Cons (a + b) (sa + sb)
+
+
