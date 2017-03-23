@@ -89,9 +89,9 @@ interleaveStreams (Cons a s1) s2 = Cons a (interleaveStreams s2 s1)
 ruler :: Stream Integer
 ruler = interleaveStreams zeros a001511Seq
   where
-    zeros = streamRepeat 0
-    oneToInfinity= streamFromSeed succ 1
-    a001511Seq = streamMap (succ . valueOrMinusOne . indexOfOneFromLeft . toBinaryRepresentation) oneToInfinity
+    zeros         = streamRepeat 0
+    oneToInfinity = streamFromSeed succ 1
+    a001511Seq    = streamMap (succ . valueOrMinusOne . indexOfOneFromLeft . toBinaryRepresentation) oneToInfinity
 
 toBinaryRepresentation :: Integer -> String
 toBinaryRepresentation x = showIntAtBase 2 intToDigit x ""
@@ -108,8 +108,22 @@ z :: Stream Integer
 z = Cons 0 (Cons 1 (streamRepeat 0))
 
 instance Num (Stream Integer) where
-  fromInteger n = Cons n (streamRepeat 0)
-  negate s = streamMap negate s
-  (Cons a sa) + (Cons b sb) = Cons (a + b) (sa + sb)
+  fromInteger n                  = Cons n (streamRepeat 0)
+  negate s                       = streamMap negate s
+  (Cons a sa) + (Cons b sb)      = Cons (a + b) (sa + sb)
+  (Cons a0 sa) * s2@(Cons b0 sb) = Cons (a0 * b0) (a0B' + a'b)
+    where
+      a0B' = streamMap (a0*) sb
+      a'b  = sa * s2
+
+instance Fractional (Stream Integer) where
+  s1@(Cons a0 sa) / s2@(Cons b0 sb) =  Cons (a0 `div` b0) (sa - q * sb)
+    where
+      q = s1 / s2
+
+fibs3 :: Stream Integer
+fibs3 = z / (1 - z - z^2)
+
+data Matrix = M ((Integer, Integer), (Integer, Integer))
 
 
