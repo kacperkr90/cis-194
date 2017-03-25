@@ -124,6 +124,38 @@ instance Fractional (Stream Integer) where
 fibs3 :: Stream Integer
 fibs3 = z / (1 - z - z^2)
 
-data Matrix = M ((Integer, Integer), (Integer, Integer))
+data Matrix = M (Integer, Integer) (Integer, Integer)
 
+            -- [ b00, b01 ]
+            -- [ b10, b11
+-- [ a00, a01 ]
+-- [ a10, a11 ]
 
+instance Show Matrix where
+  show (M (a00, a01) (a10, a11)) = "[ " ++ show a00 ++ " " ++ show a01 ++ " ]\n" ++ "[ " ++ show a10 ++ " " ++ show a11 ++ " ]"
+
+instance Num Matrix where
+  fromInteger n                                     = M (n, n) (n, n)
+  M (a00, a01) (a10, a11) + M (b00, b01) (b10, b11) = M (c00, c01) (c10, c11)
+    where
+      c00 = a00 + b00
+      c01 = a01 + b01
+      c10 = a10 + b10
+      c11 = a11 + b11
+  M (a00, a01) (a10, a11) * M (b00, b01) (b10, b11) = M (c00, c01) (c10, c11)
+    where
+      c00 = a00 * b00 + a01 * b10
+      c01 = a00 * b01 + a01 * b11
+      c10 = a10 * b00 + a11 * b10
+      c11 = a10 * b01 + a11 * b11
+  negate a = a * (-1)
+
+f :: Matrix
+f = M (1, 1) (1, 0)
+
+fib4:: Integer -> Integer
+fib4 0 = 0
+fib4 n = res
+  where
+    fn = f ^ n
+    M (_, res) _ = fn
