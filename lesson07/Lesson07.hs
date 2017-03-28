@@ -1,4 +1,8 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 -- Folds, again
+
+module Lesson07 where
 
 data Tree a = Empty
             | Node (Tree a) a (Tree a)
@@ -67,9 +71,9 @@ numLiterals = exprTFold (const 1) (+) (+)
 --   mconcat :: [m] -> m
 --   mconcat = foldr mappend mempty
 
-instance Monoid [a] where
-  mempty = []
-  mappend = (++)
+-- instance Monoid [a] where
+--   mempty = []
+--   mappend = (++)
 
 newtype Sum a = Sum a
   deriving (Eq, Ord, Num, Show)
@@ -100,3 +104,27 @@ prod = getProduct . mconcat . map Product $ lst
 -- instance (Monoid a, Monoid b) => Monoid (a, b) where
 --   mempty = (mempty, mempty)
 --   (a, b) `mappend` (c, d) = (a `mappend` c, b `mappend` d)
+
+-- CHALLENGES
+
+newtype Or = Or Bool
+  deriving (Show, Eq)
+
+instance Monoid Or where
+  mempty = Or False
+  Or x `mappend` Or y = Or (x || y)
+
+newtype And = And Bool
+  deriving (Show, Eq)
+
+instance Monoid And where
+  mempty = And True
+  And x `mappend` And y = And (x && y)
+
+newtype MyFunctionWrapper a = MyFunctionWrapper (a -> a)
+
+instance Monoid (MyFunctionWrapper a) where
+  mempty = MyFunctionWrapper (id)
+  MyFunctionWrapper f `mappend` MyFunctionWrapper g = MyFunctionWrapper (f . g)
+
+
