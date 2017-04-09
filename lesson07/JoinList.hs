@@ -2,11 +2,11 @@
 
 module JoinList(
   (+++),
-  indexJ
+  indexJ,
+  testCase
   ) where
 
 import Sized
-import Data.Maybe
 -- data JoinListBasic a = Empty
 --   | Single a
 --   | Append (JoinListBasic a) (JoinListBasic a)
@@ -35,13 +35,21 @@ tag (Append m _ _) = m
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 indexJ _ Empty     = Nothing
 indexJ i _ | i < 0 = Nothing
-indexJ i (Single _ a)
-  | i > 0  = Nothing
-  | otherwise = Just a
-indexJ i (Append m _ _) | i > (pred $ getSize $ size m) = Nothing
+indexJ 0 (Single _ a) = Just a
+indexJ _ (Single _ _) = Nothing
+indexJ i l | i > (pred $ getListSize l) = Nothing
 indexJ i (Append _ l1 l2)
-  | isNothing a1 = a2
-  | otherwise = a1
+  | i < n1 = indexJ i l1
+  | otherwise = indexJ (i - n1) l2
   where
-    a1 = indexJ i l1
-    a2 = indexJ i l2
+    n1 = getNumberOfIndices l1
+
+getListSize :: (Sized m, Monoid m) => JoinList m a -> Int
+getListSize = getSize . size . tag
+
+getNumberOfIndices :: (Sized m, Monoid m) => JoinList m a -> Int
+getNumberOfIndices (Single _ _) = 1
+getNumberOfIndices l            = getListSize l
+
+testCase :: JoinList Size Char
+testCase = Append (Size 4) (Append (Size 3) (Single (Size 0) 'y') (Append (Size 2) (Single (Size 0) 'e') (Single (Size 0) 'a'))) (Single (Size 0) 'h')
