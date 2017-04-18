@@ -13,6 +13,7 @@ module JoinList(
   ) where
 
 import Sized
+import Scrabble
 -- data JoinListBasic a = Empty
 --   | Single a
 --   | Append (JoinListBasic a) (JoinListBasic a)
