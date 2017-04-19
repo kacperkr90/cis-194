@@ -76,7 +76,6 @@ jl :: JoinList Size Char
 jl = Append (Size 4) (Append (Size 3) (Single (Size 1) 'y') (Append (Size 2) (Single (Size 1) 'e') (Single (Size 1) 'a'))) (Single (Size 1) 'h')
 
 -- writing fold is overkill , but fun nonetheless :P
--- TODO add monoid parameter updating
 
 foldSomeJ :: (Sized b, Monoid b) => (JoinList b a -> JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> Int -> JoinList b a -> JoinList b a
 foldSomeJ _ _ expD _ i l | i <= 0 = expD l
