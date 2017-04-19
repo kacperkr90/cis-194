@@ -9,7 +9,8 @@ module JoinList(
   jlToList,
   testIndexJ,
   testDropJ,
-  testTakeJ
+  testTakeJ,
+  scoreLine
   ) where
 
 import Sized
@@ -94,3 +95,6 @@ takeJ i l = foldSomeJ (\m l1 _ -> Append m l1 Empty) (\m l1 l2 -> Append m l1 l2
 
 testTakeJ :: Int -> Bool
 testTakeJ n = jlToList (takeJ n jl) == take n (jlToList jl)
+
+scoreLine :: String ->  JoinList Score String
+scoreLine l = Single (scoreString l) l

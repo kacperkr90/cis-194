@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 module Scrabble(
-  Score,
+  Score(..),
   score,
   scoreString
   ) where
