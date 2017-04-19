@@ -3,7 +3,8 @@
 module Scrabble(
   Score(..),
   score,
-  scoreString
+  scoreString,
+  getScore
   ) where
 
 import qualified Data.Map as Map
@@ -35,3 +36,6 @@ score c
 
 scoreString :: String -> Score
 scoreString = foldl (mappend) mempty . map score
+
+getScore :: Score -> Int
+getScore (Score s) = s

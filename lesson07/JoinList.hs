@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module JoinList(
   (+++),
@@ -10,11 +11,16 @@ module JoinList(
   testIndexJ,
   testDropJ,
   testTakeJ,
-  scoreLine
+  scoreLine,
+  Buffer(..),
+  JoinList(..),
+  Size(..),
+  Score(..)
   ) where
 
 import Sized
 import Scrabble
+import Buffer
 -- data JoinListBasic a = Empty
 --   | Single a
 --   | Append (JoinListBasic a) (JoinListBasic a)
@@ -57,7 +63,7 @@ indexJ i (Append _ l1 l2)
   | i < n1    = indexJ i l1
   | otherwise = indexJ (i - n1) l2
   where
-    n1 = getNumberOfIndices l1
+    n1 = getListSize l1
 indexJ _ _ = Nothing
 
 testIndexJ :: Int -> Bool
@@ -66,35 +72,47 @@ testIndexJ i = (indexJ i jl) == (jlToList jl !!? i)
 getListSize :: (Sized m, Monoid m) => JoinList m a -> Int
 getListSize = getSize . size . tag
 
-getNumberOfIndices :: (Sized m, Monoid m) => JoinList m a -> Int
-getNumberOfIndices (Single _ _) = 1
-getNumberOfIndices l            = getListSize l
-
 jl :: JoinList Size Char
-jl = Append (Size 4) (Append (Size 3) (Single (Size 0) 'y') (Append (Size 2) (Single (Size 0) 'e') (Single (Size 0) 'a'))) (Single (Size 0) 'h')
+jl = Append (Size 4) (Append (Size 3) (Single (Size 1) 'y') (Append (Size 2) (Single (Size 1) 'e') (Single (Size 1) 'a'))) (Single (Size 1) 'h')
 
--- writing fold is overkill, but fun nonetheless :P
+-- writing fold is overkill , but fun nonetheless :P
+-- TODO add monoid parameter updating
 
-foldSomeJ :: (Sized b, Monoid b) => (b -> JoinList b a -> JoinList b a -> JoinList b a) -> (b -> JoinList b a -> JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> Int -> JoinList b a -> JoinList b a
+foldSomeJ :: (Sized b, Monoid b) => (JoinList b a -> JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> (JoinList b a -> JoinList b a) -> Int -> JoinList b a -> JoinList b a
 foldSomeJ _ _ expD _ i l | i <= 0 = expD l
-foldSomeJ fl fr expD expO i (Append m l1 l2)
-  | i <= s1   = fl m (foldSomeJ fl fr expD expO i l1) l2
-  | otherwise = fr m l1 (foldSomeJ fl fr expD expO (i - s1) l2)
+foldSomeJ fl fr expD expO i (Append _ l1 l2)
+  | i <= s1   = fl nl1 l2
+  | otherwise = fr l1 nl2
   where
-    s1 = getNumberOfIndices l1
+    s1 = getListSize l1
+    nl1 = foldSomeJ fl fr expD expO i l1
+    nl2 = foldSomeJ fl fr expD expO (i - s1) l2
 foldSomeJ _ _ _ expO _ l = expO l
 
 dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
-dropJ i l = foldSomeJ (\m l1 l2 -> Append m l1 l2) (\m _ l2 -> Append m Empty l2) id (\_ -> Empty) i l
+dropJ i l = foldSomeJ (\l1 l2 -> Append (tag l1 `mappend` tag l2) l1 l2) (\_ l2 -> Append (tag l2) Empty l2) id (\_ -> Empty) i l
 
 testDropJ :: Int -> Bool
 testDropJ n = jlToList (dropJ n jl) == drop n (jlToList jl)
 
 takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
-takeJ i l = foldSomeJ (\m l1 _ -> Append m l1 Empty) (\m l1 l2 -> Append m l1 l2) (\_ -> Empty) id i l
+takeJ i l = foldSomeJ (\l1 _ -> Append (tag l1) l1 Empty) (\l1 l2 -> Append (tag l1 `mappend` tag l2) l1 l2) (\_ -> Empty) id i l
 
 testTakeJ :: Int -> Bool
 testTakeJ n = jlToList (takeJ n jl) == take n (jlToList jl)
 
 scoreLine :: String ->  JoinList Score String
 scoreLine l = Single (scoreString l) l
+
+scoreLine' :: String -> JoinList (Score, Size) String
+scoreLine' s = Single (scoreString s, Size 1) s
+
+instance Buffer (JoinList (Score, Size) String) where
+  toString Empty = ""
+  toString (Single _ l) = l
+  toString (Append _ l1 l2) = toString l1 ++ toString l2
+  fromString s = foldl (+++) Empty $ map scoreLine' $ lines s
+  line n b = indexJ n b
+  numLines = getListSize
+  value = getScore . fst . tag
+  replaceLine n l b = takeJ n b +++ scoreLine' l +++ dropJ (n + 1) b
