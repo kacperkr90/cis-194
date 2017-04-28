@@ -6,6 +6,7 @@ module Party
 
 import Employee
 import Data.Tree
+import Debug.Trace
 
 glCons :: Employee -> GuestList -> GuestList
 glCons e (GL l f) = GL newList updatedFun
@@ -26,15 +27,13 @@ moreFun l1 l2
   | listFun l1 > listFun l2 = l1
   | otherwise               = l2
 
-treeFold :: (b -> Tree a -> b) -> b -> Tree a -> b
-treeFold f e t@(Node _ []) = f e t
-treeFold f e (Node _ t) = foldl f e t
+treeFold :: (Show a, Show b) => (b -> Tree a -> b) -> b -> Tree a -> b
+treeFold f acc t@(Node _ []) = trace ("returning result " ++ show acc) (acc)
+treeFold f acc (Node e (t:ts)) = trace ("current employee " ++ (show e)) (treeFold f acc (Node (rootLabel t) ts))
+-- treeFold f acc t = trace ("calling foldl on with acc " ++ (show acc) ++ "and subForest " ++ (show $ subForest t) ++ "\n") (foldl f (acc) (subForest t))
 
 funniestEmployee :: Tree Employee -> Employee
-funniestEmployee tree = treeFold (\e t -> funnierEmployee e $ currentEmployee t) (currentEmployee tree) tree
-
-currentEmployee :: Tree Employee -> Employee
-currentEmployee (Node e _) = e
+funniestEmployee tree = treeFold (\e t -> funnierEmployee e $ rootLabel t) (rootLabel tree) tree
 
 funnierEmployee :: Employee -> Employee -> Employee
 funnierEmployee e1 e2
@@ -45,4 +44,4 @@ funnierEmployee e1 e2
     f2 = empFun e2
 
 treeSumFun :: Tree Employee -> Fun
-treeSumFun = treeFold (\s t -> s + empFun (currentEmployee t)) 0
+treeSumFun = treeFold (\s t -> s + empFun (rootLabel t)) 0
