@@ -29,16 +29,16 @@ treeFold
   :: (Show a, Show b)
   => (a -> [b] -> b) -> Tree a -> b
 treeFold f (Node x []) = f x []
-treeFold f (Node x ts) = f x (map (\t -> treeFold f t) ts)
+treeFold f (Node x ts) = f x (map (treeFold f) ts)
 
 sumFun :: Tree Employee -> Fun
-sumFun = treeFold (\e rs -> foldl (+) 0 ((empFun e) : rs))
+sumFun = treeFold (\e rs -> sum (empFun e : rs))
 
 funniestEmployee :: Tree Employee -> Employee
-funniestEmployee = treeFold (\e rs -> foldl (funnierEmployee) e (e : rs))
+funniestEmployee = treeFold (\e rs -> foldl funnierEmployee e (e : rs))
 
 saddestEmployee :: Tree Employee -> Employee
-saddestEmployee = treeFold (\e rs -> foldl (sadderEmployee) e (e : rs))
+saddestEmployee = treeFold (\e rs -> foldl sadderEmployee e (e : rs))
 
 oneOfEmployees :: (Employee -> Employee -> Bool) -> Employee -> Employee -> Employee
 oneOfEmployees f e1 e2
@@ -46,10 +46,10 @@ oneOfEmployees f e1 e2
   | otherwise = e2
 
 funnierEmployee :: Employee -> Employee -> Employee
-funnierEmployee e1 e2 = oneOfEmployees (\x1 x2 -> empFun x1 >= empFun x2) e1 e2
+funnierEmployee = oneOfEmployees (\x1 x2 -> empFun x1 >= empFun x2)
 
 sadderEmployee :: Employee -> Employee -> Employee
-sadderEmployee e1 e2 = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2) e1 e2
+sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 
-combineGLs :: Employee -> [GuestList] -> GuestList
-combineGLs (Node e ts) =
+-- combineGLs :: Employee -> [GuestList] -> GuestList
+-- combineGLs (Node e ts) =
