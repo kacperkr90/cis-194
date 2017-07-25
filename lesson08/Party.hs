@@ -22,7 +22,7 @@ listFun (GL _ f) = f
 
 moreFun :: GuestList -> GuestList -> GuestList
 moreFun l1 l2
-  | listFun l1 > listFun l2 = l1
+  | listFun l1 >= listFun l2 = l1
   | otherwise = l2
 
 treeFold
@@ -52,4 +52,24 @@ sadderEmployee :: Employee -> Employee -> Employee
 sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 
 -- combineGLs :: Employee -> [GuestList] -> GuestList
--- combineGLs (Node e ts) =
+-- combineGLs boss 
+
+--nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+
+employeesListAsGuestList :: [Employee] -> GuestList
+employeesListAsGuestList es = GL es totalFun
+  where
+    totalFun = sum $ map empFun es
+
+employeeAsGuestList :: Employee -> GuestList
+employeeAsGuestList e = GL [e] (empFun e) 
+
+buildOptimalGuestList :: Tree Employee -> (GuestList, GuestList)
+buildOptimalGuestList (Node boss []) = (GL [boss] (empFun boss), mempty)
+buildOptimalGuestList (Node boss subdivisions)  
+  | bossFun > subdivisionsBossesFun = (mempty, mempty)
+  | otherwise = (mempty, mempty)
+  where
+    bossFun = empFun boss
+    subdivisionsBosses = map rootLabel subdivisions
+    subdivisionsBossesFun = sum $ map empFun subdivisionsBosses
