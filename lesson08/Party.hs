@@ -4,6 +4,7 @@
 module Party where
 
 import Data.Tree
+import Data.Monoid
 import Debug.Trace
 import Employee
 
@@ -33,7 +34,7 @@ treeFold f (Node x []) = f x []
 treeFold f (Node x ts) = f x (map (treeFold f) ts)
 
 sumFun :: Tree Employee -> Fun
-sumFun = treeFold (\e rs -> sum (empFun e : rs))
+sumFun = treeFold (\e es -> sum (empFun e : es))
 
 funniestEmployee :: Tree Employee -> Employee
 funniestEmployee = treeFold (\e rs -> foldl funnierEmployee e (e : rs))
@@ -52,33 +53,20 @@ funnierEmployee = oneOfEmployees (\x1 x2 -> empFun x1 >= empFun x2)
 sadderEmployee :: Employee -> Employee -> Employee
 sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 
--- combineGLs :: Employee -> [GuestList] -> GuestList
--- combineGLs boss 
+combineGLs :: Employee -> [GuestList] -> GuestList
+combineGLs boss gls = glCons boss $ foldl (<>) mempty gls
 
 employeeAsGuestList :: Employee -> GuestList
 employeeAsGuestList e = GL [e] (empFun e) 
 
-buildOptimalGuestList :: Tree Employee -> GuestList 
-buildOptimalGuestList (Node boss []) = employeeAsGuestList boss 
-buildOptimalGuestList (Node boss subdivisions)  
-  | bossFun > subdivisionsBossesFun = employeeAsGuestList boss `mappend` subdivisionsEmployeesGL 
-  | otherwise = subdivisionsBossesGL 
-  where
-    bossFun = empFun boss
-    subdivisionsBosses = map rootLabel subdivisions
-    subdivisionsBossesGL = foldl mappend mempty $ map buildOptimalGuestList subdivisions 
-    subdivisionsBossesFun = sum $ map empFun subdivisionsBosses
-    subdivisionsEmployees = concat $ map subForest subdivisions
-    subdivisionsEmployeesGL = foldl mappend mempty $ map buildOptimalGuestList subdivisionsEmployees
-    
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
 nextLevel boss [] = (employeeAsGuestList boss, mempty)
 nextLevel boss pairs = (glWithBoss, sndCombinedGL)
   where
-    fstCombinedGL = foldl mappend mempty $ map fst pairs
-    sndCombinedGL = foldl mappend mempty $ map snd pairs
-    glWithBoss = employeeAsGuestList boss `mappend` fstCombinedGL
+    fstGLs = map fst pairs
+    sndCombinedGL = foldl (<>) mempty $ map snd pairs
+    glWithBoss = combineGLs boss fstGLs
 
-maxFun :: Tree Employee -> GuestList
-maxFun (Node boss []) = employeeAsGuestList boss
-maxFun _ = mempty
+computeGLs :: Tree Employee -> [(GuestList, GuestList)]
+computeGLs (Node boss divs) = []
+
