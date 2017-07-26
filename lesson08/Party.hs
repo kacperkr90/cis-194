@@ -4,6 +4,7 @@
 module Party where
 
 import Data.Tree
+import Debug.Trace
 import Employee
 
 glCons :: Employee -> GuestList -> GuestList
@@ -54,22 +55,30 @@ sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 -- combineGLs :: Employee -> [GuestList] -> GuestList
 -- combineGLs boss 
 
---nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
-
-employeesListAsGuestList :: [Employee] -> GuestList
-employeesListAsGuestList es = GL es totalFun
-  where
-    totalFun = sum $ map empFun es
-
 employeeAsGuestList :: Employee -> GuestList
 employeeAsGuestList e = GL [e] (empFun e) 
 
-buildOptimalGuestList :: Tree Employee -> (GuestList, GuestList)
-buildOptimalGuestList (Node boss []) = (GL [boss] (empFun boss), mempty)
+buildOptimalGuestList :: Tree Employee -> GuestList 
+buildOptimalGuestList (Node boss []) = employeeAsGuestList boss 
 buildOptimalGuestList (Node boss subdivisions)  
-  | bossFun > subdivisionsBossesFun = (mempty, mempty)
-  | otherwise = (mempty, mempty)
+  | bossFun > subdivisionsBossesFun = employeeAsGuestList boss `mappend` subdivisionsEmployeesGL 
+  | otherwise = subdivisionsBossesGL 
   where
     bossFun = empFun boss
     subdivisionsBosses = map rootLabel subdivisions
+    subdivisionsBossesGL = foldl mappend mempty $ map buildOptimalGuestList subdivisions 
     subdivisionsBossesFun = sum $ map empFun subdivisionsBosses
+    subdivisionsEmployees = concat $ map subForest subdivisions
+    subdivisionsEmployeesGL = foldl mappend mempty $ map buildOptimalGuestList subdivisionsEmployees
+    
+nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel boss [] = (employeeAsGuestList boss, mempty)
+nextLevel boss pairs = (glWithBoss, sndCombinedGL)
+  where
+    fstCombinedGL = foldl mappend mempty $ map fst pairs
+    sndCombinedGL = foldl mappend mempty $ map snd pairs
+    glWithBoss = employeeAsGuestList boss `mappend` fstCombinedGL
+
+maxFun :: Tree Employee -> GuestList
+maxFun (Node boss []) = employeeAsGuestList boss
+maxFun _ = mempty
