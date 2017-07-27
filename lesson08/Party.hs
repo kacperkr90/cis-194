@@ -24,13 +24,12 @@ listFun (GL _ f) = f
 
 moreFun :: GuestList -> GuestList -> GuestList
 moreFun l1 l2
-  | listFun l1 >= listFun l2 = l1
+  | l1 >= l2 = l1
   | otherwise = l2
 
 treeFold
   :: (Show a, Show b)
   => (a -> [b] -> b) -> Tree a -> b
-treeFold f (Node x []) = f x []
 treeFold f (Node x ts) = f x (map (treeFold f) ts)
 
 sumFun :: Tree Employee -> Fun
@@ -53,20 +52,20 @@ funnierEmployee = oneOfEmployees (\x1 x2 -> empFun x1 >= empFun x2)
 sadderEmployee :: Employee -> Employee -> Employee
 sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 
-combineGLs :: Employee -> [GuestList] -> GuestList
-combineGLs boss gls = glCons boss $ foldl (<>) mempty gls
+joinGLs :: [GuestList] -> GuestList
 
-employeeAsGuestList :: Employee -> GuestList
-employeeAsGuestList e = GL [e] (empFun e) 
+combineGLs :: Employee -> [GuestList] -> GuestList
+combineGLs boss gls = glCons boss $ foldl (<>) mempty gls 
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
-nextLevel boss [] = (employeeAsGuestList boss, mempty)
-nextLevel boss pairs = (glWithBoss, sndCombinedGL)
+nextLevel boss pairs = (funniestWoBossGL, funniestWtBossGL)
   where
-    fstGLs = map fst pairs
-    sndCombinedGL = foldl (<>) mempty $ map snd pairs
-    glWithBoss = combineGLs boss fstGLs
+    wtBossGLs = map fst pairs
+    woBossGLs = map snd pairs
+    funniestWtBossGL = foldl (<>) mempty wtBossGLs 
+    funniestWoBossGL = combineGLs boss woBossGLs
 
-computeGLs :: Tree Employee -> [(GuestList, GuestList)]
-computeGLs (Node boss divs) = []
-
+maxFun :: Tree Employee -> GuestList
+maxFun tree = moreFun (fst gls) (snd gls)
+  where
+    gls = treeFold nextLevel tree
