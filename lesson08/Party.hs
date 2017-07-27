@@ -53,16 +53,17 @@ sadderEmployee :: Employee -> Employee -> Employee
 sadderEmployee = oneOfEmployees (\x1 x2 -> empFun x1 <= empFun x2)
 
 joinGLs :: [GuestList] -> GuestList
+joinGLs = foldl (<>) mempty
 
 combineGLs :: Employee -> [GuestList] -> GuestList
-combineGLs boss gls = glCons boss $ foldl (<>) mempty gls 
+combineGLs boss gls = glCons boss $ joinGLs gls
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
 nextLevel boss pairs = (funniestWoBossGL, funniestWtBossGL)
   where
     wtBossGLs = map fst pairs
     woBossGLs = map snd pairs
-    funniestWtBossGL = foldl (<>) mempty wtBossGLs 
+    funniestWtBossGL = joinGLs wtBossGLs 
     funniestWoBossGL = combineGLs boss woBossGLs
 
 maxFun :: Tree Employee -> GuestList
