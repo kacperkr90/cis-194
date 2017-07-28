@@ -5,8 +5,11 @@ module Party where
 
 import Data.Tree
 import Data.Monoid
+import Data.Maybe
 import Debug.Trace
 import Employee
+import Text.Read
+import Data.List
 
 glCons :: Employee -> GuestList -> GuestList
 glCons e (GL l f) = GL newList updatedFun
@@ -70,3 +73,25 @@ maxFun :: Tree Employee -> GuestList
 maxFun tree = moreFun (fst gls) (snd gls)
   where
     gls = treeFold nextLevel tree
+
+testCompanyAsString :: String
+testCompanyAsString = show testCompany 
+
+parseEmployeesTree :: String -> Maybe (Tree Employee)
+parseEmployeesTree = readMaybe
+
+instance Ord Employee where
+  compare (Emp n1 _) (Emp n2 _) = compare n1 n2
+
+prettyShow :: GuestList -> String
+prettyShow (GL emps fun) = title ++ employeesNamesSorted 
+  where
+    title = "Total fun: " ++ (show $ fun)
+    employeesNamesSorted = unwords $ sort $ map ((++) "\n" . empName) emps
+
+showAsPrettifiedGL :: String -> String
+showAsPrettifiedGL input
+  | isJust employeesTree = prettyShow $ maxFun $ fromJust employeesTree 
+  | otherwise = "There was an error parsing the Tree Employee object."
+  where
+    employeesTree = parseEmployeesTree input
