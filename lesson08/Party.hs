@@ -66,7 +66,7 @@ nextLevel boss pairs = (funniestWoBossGL, funniestWtBossGL)
   where
     wtBossGLs = map fst pairs
     woBossGLs = map snd pairs
-    funniestWtBossGL = joinGLs wtBossGLs 
+    funniestWtBossGL = joinGLs wtBossGLs
     funniestWoBossGL = combineGLs boss woBossGLs
 
 maxFun :: Tree Employee -> GuestList
@@ -75,7 +75,7 @@ maxFun tree = moreFun (fst gls) (snd gls)
     gls = treeFold nextLevel tree
 
 testCompanyAsString :: String
-testCompanyAsString = show testCompany 
+testCompanyAsString = show testCompany
 
 parseEmployeesTree :: String -> Maybe (Tree Employee)
 parseEmployeesTree = readMaybe
@@ -84,14 +84,19 @@ instance Ord Employee where
   compare (Emp n1 _) (Emp n2 _) = compare n1 n2
 
 prettyShow :: GuestList -> String
-prettyShow (GL emps fun) = title ++ employeesNamesSorted 
+prettyShow (GL emps fun) = title ++ employeesNamesSorted
   where
     title = "Total fun: " ++ (show $ fun)
     employeesNamesSorted = unwords $ sort $ map ((++) "\n" . empName) emps
 
 showAsPrettifiedGL :: String -> String
 showAsPrettifiedGL input
-  | isJust employeesTree = prettyShow $ maxFun $ fromJust employeesTree 
+  | isJust employeesTree = prettyShow $ maxFun $ fromJust employeesTree
   | otherwise = "There was an error parsing the Tree Employee object."
   where
     employeesTree = parseEmployeesTree input
+
+main :: IO()
+main = do
+  line <- readFile "company.txt"
+  putStrLn $ showAsPrettifiedGL line
